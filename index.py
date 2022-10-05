@@ -35,7 +35,7 @@ pygame.display.set_caption('SpaceInvader')
 
 run = True
 start = gameover = False
-shipCooX = 260
+shipCooX = 500
 direction = "null"
 font = pygame.font.Font('freesansbold.ttf', 32)
 shipImg = pygame.image.load("ship.png")
@@ -48,7 +48,7 @@ img = font.render('Score : ' + str(score), True, (255, 255, 255))
 text2 = font.render('Highest Score : ' + str(highscore), True, (255, 255, 255))
 screen.blit(shipImg, (shipCooX, 730))
 screen.blit(img, (20, 20))
-screen.blit(text2, (800, 20))
+screen.blit(text2, (700, 20))
 
 while run:
 
@@ -82,21 +82,29 @@ while run:
                     timerEverySeconds = time.time()
                     start = True
                 if event.key == pygame.K_LEFT:
-                    shipCooX = shipCooX - shipSpeed
-                    if shipCooX < 0:
-                        shipCooX = shipCooX
+                    direction = "left"
                 if event.key == pygame.K_RIGHT:
-                    shipCooX = shipCooX + shipSpeed
-                    if shipCooX > 970:
-                        shipCooX = shipCooX
+                    direction = "right"
+            if event.type == pygame.KEYUP:
+                direction = "null"
+        if direction == "left":
+            if shipCooX < 10:
+                shipCooX = shipCooX
+            else:
+                shipCooX = shipCooX - shipSpeed
+        if direction == "right":
+            if shipCooX > 940:
+                shipCooX = shipCooX
+            else:
+                shipCooX = shipCooX + shipSpeed
 
         if start is True:
             screen.fill((0, 0, 0))
             img = font.render('Score : ' + str(score), True, (255, 255, 255))
-            text2 = font.render('Highest Score : ' + str(highscore), True, (255, 255, 255))
+            scoreText = font.render('Highest Score : ' + str(highscore), True, (255, 255, 255))
             screen.blit(shipImg, (shipCooX, 730))
             screen.blit(img, (20, 20))
-            screen.blit(text2, (800, 20))
+            screen.blit(scoreText, (700, 20))
 
     clock.tick(60)
     pygame.display.flip()
