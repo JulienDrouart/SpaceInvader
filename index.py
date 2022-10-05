@@ -33,25 +33,28 @@ pygame.init()
 screen = pygame.display.set_mode((1000, 800))
 pygame.display.set_caption('SpaceInvader')
 
+
 run = True
 start = gameover = False
+fond = pygame.image.load("fond.jpg")
+rocket = pygame.image.load("rocket.png")
+screen.blit(fond, (0, 0))
 shipCooX = 500
 direction = "null"
 font = pygame.font.Font('freesansbold.ttf', 32)
 shipImg = pygame.image.load("ship.png")
-score = 0
+score = rocketPosX = rocketPosY = 0
 clock = pygame.time.Clock()
-shipSpeed = 7
+shipSpeed = 9
 highscore = selectDatabase()
-screen.fill((0, 0, 0))
-img = font.render('Score : ' + str(score), True, (255, 255, 255))
 text2 = font.render('Highest Score : ' + str(highscore), True, (255, 255, 255))
 screen.blit(shipImg, (shipCooX, 730))
-screen.blit(img, (20, 20))
 screen.blit(text2, (700, 20))
+screen.blit(rocket, (rocketPosX, rocketPosY))
+rocketState = "waiting"
+
 
 while run:
-
     while gameover:
         font = pygame.font.SysFont(None, 50)
         end = font.render('Press Enter to restart game', True, (255, 255, 255))
@@ -85,8 +88,17 @@ while run:
                     direction = "left"
                 if event.key == pygame.K_RIGHT:
                     direction = "right"
+                if event.key == pygame.K_SPACE and rocketState=="waiting":
+                    rocketPosX = shipCooX+25
+                    rocketPosY = 750
+                    rocketState = "launching"
             if event.type == pygame.KEYUP:
                 direction = "null"
+        if rocketState == "launching":
+            if rocketPosY<-50:
+                rocketState = "waiting"
+            else:
+                rocketPosY -= 6
         if direction == "left":
             if shipCooX < 10:
                 shipCooX = shipCooX
@@ -99,10 +111,11 @@ while run:
                 shipCooX = shipCooX + shipSpeed
 
         if start is True:
-            screen.fill((0, 0, 0))
+            screen.blit(fond, (0, 0))
             img = font.render('Score : ' + str(score), True, (255, 255, 255))
             scoreText = font.render('Highest Score : ' + str(highscore), True, (255, 255, 255))
             screen.blit(shipImg, (shipCooX, 730))
+            screen.blit(rocket, (rocketPosX, rocketPosY))
             screen.blit(img, (20, 20))
             screen.blit(scoreText, (700, 20))
 
