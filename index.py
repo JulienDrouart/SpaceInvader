@@ -1,11 +1,12 @@
 import os
-
+from random import randint
 import pygame, sys
 import random
 import time
 import sqlite3
 from pygame.locals import *
 from sqlite3 import Error
+from collections import OrderedDict
 
 connection = sqlite3.connect('score.db')
 cursor = connection.cursor()
@@ -43,12 +44,14 @@ def loopFunction():
     start = gameover = False
     fond = pygame.image.load("fond.jpg")
     rocket = pygame.image.load("rocket.png")
+    ennemyRocket = pygame.image.load("invaderRocket.png")
     screen.blit(fond, (0, 0))
     shipCooX = 500
     direction = "null"
     font = pygame.font.Font('freesansbold.ttf', 32)
     shipImg = pygame.image.load("ship.png")
     screen.blit(shipImg, (shipCooX, 730))
+    screen.blit(ennemyRocket, (2000, 2000))
     score = rocketPosX = 0
     rocketPosY = 2000
     clock = pygame.time.Clock()
@@ -63,8 +66,10 @@ def loopFunction():
     intervalOf10 = row = 0
     invaders = {}
     invaderImg = pygame.image.load("invader.png")
-
-    for i in range(70):
+    invadersNumbers = 70
+    ennemyRocketPosX = ennemyRocketPosY = 2000
+    ennemyRocketState = "waiting"
+    for i in range(invadersNumbers):
         invaders[i] = {'posX': (intervalOf10 * 100) + 25, 'posY': (row * 50) + 100, 'state': "alive"}
         screen.blit(invaderImg, ((intervalOf10 * 100) + 25, (row * 50) + 100))
 
@@ -78,7 +83,7 @@ def loopFunction():
         while gameover:
             font = pygame.font.SysFont(None, 50)
             end = font.render('Press Enter to restart game', True, (255, 255, 255))
-            screen.blit(end, (50, 50))
+            screen.blit(end, (350, 500))
             clock.tick(60)
             pygame.display.flip()
             for event in pygame.event.get():
@@ -126,23 +131,46 @@ def loopFunction():
 
             if start is True:
                 screen.blit(fond, (0, 0))
-                img = font.render('Score : ' + str(score), True, (255, 255, 255))
+                currentScoreText = font.render('Score : ' + str(score), True, (255, 255, 255))
                 scoreText = font.render('Highest Score : ' + str(highscore), True, (255, 255, 255))
                 screen.blit(shipImg, (shipCooX, 730))
                 screen.blit(rocket, (rocketPosX, rocketPosY))
-                screen.blit(img, (20, 20))
+                screen.blit(currentScoreText, (200, 20))
                 screen.blit(scoreText, (700, 20))
-                for i in range(70):
+                atLeastOneAlive = False
+                # Tir des invaders
+
+                if pygame.Rect.colliderect(Rect(ennemyRocketPosX + 20, ennemyRocketPosY + 20, 10, 10),
+                                           Rect(shipCooX + 2, 735, 50, 50)):
+                    gameover = True
+                invaderToShoot = randint(0, 69)
+                if invaderToShoot in invaders:
+                    if ennemyRocketState == "waiting" and invaders[invaderToShoot]["state"] == "alive":
+                        ennemyRocketPosX = invaders[invaderToShoot]["posX"]
+                        ennemyRocketPosY = invaders[invaderToShoot]["posY"]
+                        ennemyRocketState = "falling"
+                if ennemyRocketState == "falling":
+                    screen.blit(ennemyRocket, (ennemyRocketPosX + 23, ennemyRocketPosY))
+                    ennemyRocketPosY += 2
+                for i in range(invadersNumbers):
+
+                    if ennemyRocketPosY > 800:
+                        ennemyRocketState = "waiting"
                     if invaders[i]["state"] == "alive":
+                        atLeastOneAlive = True
                         screen.blit(invaderImg, (invaders[i]["posX"], invaders[i]["posY"]))
-                        invaders[i]["posY"] += 0.1
-                        if invaders[i]["posY"] > 730:
+                        invaders[i]["posY"] += 0.2
+                        if invaders[i]["posY"] > 700:
                             gameover = True
                         # si collision entre les coordonnées de la roquette et l'invader courant
-                        if pygame.Rect.colliderect(Rect(invaders[i]["posX"], invaders[i]["posY"], 50, 50), Rect(rocketPosX, rocketPosY, 10, 10)):
+                        if pygame.Rect.colliderect(Rect(invaders[i]["posX"], invaders[i]["posY"], 50, 50),
+                                                   Rect(rocketPosX, rocketPosY, 10, 10)):
                             invaders[i]["state"] = "dead"
                             rocketState = "waiting"
                             rocketPosY = 2000
+                            score += 1
+                if not atLeastOneAlive:
+                    gameover = True
 
         clock.tick(60)
         pygame.display.flip()
