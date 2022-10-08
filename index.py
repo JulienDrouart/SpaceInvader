@@ -46,7 +46,8 @@ direction = "null"
 font = pygame.font.Font('freesansbold.ttf', 32)
 shipImg = pygame.image.load("ship.png")
 screen.blit(shipImg, (shipCooX, 730))
-score = rocketPosX = rocketPosY = 0
+score = rocketPosX = 0
+rocketPosY = 2000
 clock = pygame.time.Clock()
 shipSpeed = 9
 highscore = selectDatabase()
