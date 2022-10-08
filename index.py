@@ -12,6 +12,7 @@ cursor = connection.cursor()
 create_table = "CREATE TABLE IF NOT EXISTS score (highscore int)"
 cursor.execute(create_table)
 
+
 def insertDatabase(score):
     dbHighestScore = selectDatabase()
     if score > dbHighestScore:
@@ -30,6 +31,7 @@ def selectDatabase():
     if str(highScore) == 'None':
         highScore = 0
     return highScore
+
 
 def loopFunction():
     pygame.init()
@@ -63,8 +65,8 @@ def loopFunction():
     invaderImg = pygame.image.load("invader.png")
 
     for i in range(70):
-        invaders[i] = {'posX': (intervalOf10 * 100)+25, 'posY': (row * 50)+100, 'state': "alive"}
-        screen.blit(invaderImg, ((intervalOf10 * 100)+25, (row * 50)+100))
+        invaders[i] = {'posX': (intervalOf10 * 100) + 25, 'posY': (row * 50) + 100, 'state': "alive"}
+        screen.blit(invaderImg, ((intervalOf10 * 100) + 25, (row * 50) + 100))
 
         if intervalOf10 < 9:
             intervalOf10 += 1
@@ -131,13 +133,19 @@ def loopFunction():
                 screen.blit(img, (20, 20))
                 screen.blit(scoreText, (700, 20))
                 for i in range(70):
-                    screen.blit(invaderImg, (invaders[i]["posX"],invaders[i]["posY"]))
-                    invaders[i]["posY"]+=3
-                    if invaders[i]["posY"] > 730:
-                        gameover = True
-
+                    if invaders[i]["state"] == "alive":
+                        screen.blit(invaderImg, (invaders[i]["posX"], invaders[i]["posY"]))
+                        invaders[i]["posY"] += 0.1
+                        if invaders[i]["posY"] > 730:
+                            gameover = True
+                        # si collision entre les coordonnées de la roquette et l'invader courant
+                        if pygame.Rect.colliderect(Rect(invaders[i]["posX"], invaders[i]["posY"], 50, 50), Rect(rocketPosX, rocketPosY, 10, 10)):
+                            invaders[i]["state"] = "dead"
+                            rocketState = "waiting"
+                            rocketPosY = 2000
 
         clock.tick(60)
         pygame.display.flip()
+
 
 loopFunction()
